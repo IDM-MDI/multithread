@@ -1,11 +1,14 @@
 package edu.by.ishangulyev.multithread.entity;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class Customer implements Runnable
 {
+    private static final Logger logger = LogManager.getLogger();
     private final String ORDER_ID;
     private final FastFood fastFood = FastFood.getInstance();
 
@@ -34,12 +37,12 @@ public class Customer implements Runnable
         if(state.equals(CustomerState.ONLINE))
         {
             fastFood.getOnlineOrder(ORDER_ID);
-            System.out.println(name + " get online order");
+            logger.log(Level.DEBUG,name + " get online order");
         }
         else
         {
             fastFood.getOfflineOrder(ORDER_ID);
-            System.out.println(name + " get offline order");
+            logger.log(Level.DEBUG,name + " get offline order");
         }
     }
 

@@ -1,11 +1,9 @@
 package edu.by.ishangulyev.multithread.entity;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -14,7 +12,7 @@ public class FastFood
     private static FastFood INSTANCE;
     private static final AtomicBoolean atomicBoolean;
     private static final ReentrantLock reentrantLock;
-    private List<Queue<Customer>> queues;
+    private List<LinkedList<Customer>> queues;
     private List<Customer> onlineOrder;
 
     static
@@ -26,7 +24,7 @@ public class FastFood
     {
         onlineOrder = new ArrayList<>();
         queues = new ArrayList<>();
-        queues.add(new ArrayDeque<>());
+        queues.add(new LinkedList<>());
     }
 
 
@@ -44,7 +42,7 @@ public class FastFood
         {
             for (int j = 0; j < queues.get(i).size(); j++)
             {
-                offline.execute(queues.get(i).poll());
+                offline.execute(queues.get(i).get(j));
             }
         }
         for (int i = 0; i < onlineOrder.size(); i++)
@@ -92,14 +90,22 @@ public class FastFood
     public void getOfflineOrder(String ID)
     {
         reentrantLock.lock();
+        try
+        {
+            TimeUnit.MILLISECONDS.sleep(1000);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
+
         if(checkOrderNumber(ID))
         {
             for (int i = 0; i < queues.size(); i++)
             {
                 for (int j = 0; j < queues.get(i).size(); j++)
                 {
-                    queues.get(i).poll().setState(CustomerState.TAKE_ORDER);
-                    notify();
+                    queues.get(i).peek().setState(CustomerState.TAKE_ORDER);
                 }
             }
         }
@@ -118,7 +124,7 @@ public class FastFood
     }
     public void createQueue()
     {
-        queues.add(new ArrayDeque<>());
+        queues.add(new LinkedList<>());
     }
 
     private int lessQueue()
@@ -163,7 +169,7 @@ public class FastFood
         return count;
     }
 
-    public void addQueue(Queue<Customer> customers)
+    public void addQueue(LinkedList<Customer> customers)
     {
         queues.add(customers);
     }
